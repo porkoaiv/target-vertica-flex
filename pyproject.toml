@@ -34,7 +34,7 @@ packages = [
 python = ">=3.8"
 sqlalchemy-vertica-python = ">=0.6.3"
 psycopg2-binary = ">=2.9.9"
-sqlalchemy = "<2.0"
+sqlalchemy = "<3.0"
 sshtunnel = ">=0.4.0"
 
 [tool.poetry.dependencies.singer-sdk]
