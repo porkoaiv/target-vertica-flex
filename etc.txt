@@ -1,0 +1,32 @@
+
+meltano lock --update --all
+
+meltano install 
+
+meltano config target-vertica-flex
+
+meltano invoke target-vertica-flex < C:\Projects\tehik\dese\ab\ab4.json
+
+10.0.84.23
+
+current
+C:\Projects\tehik\dese\target-vertica-flex
+
+  "add_metadata_columns": false,
+  "batch_size_rows": 10,
+  "data_flattening_max_level": 10,
+  "dbname": "wrh_db",
+  "default_target_schema": "VERX_CLIENT",
+  "default_target_schema_select_permission": "verx_client_dev",
+  "flush_all_streams": false,
+  "hard_delete": false,
+  "host": "10.0.84.23",
+  "max_parallelism": 16,
+  "parallelism": 0,
+  "password": "sUp!2TcLxQgxFbioqP1wa4",
+  "port": 5433,
+  "primary_key_required": true,
+  "temp_dir": "/Projects/tehik/dese/temp",
+  "user": "verx_client_dev",
+  "validate_records": false
+
