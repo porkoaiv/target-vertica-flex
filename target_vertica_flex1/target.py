@@ -1,4 +1,4 @@
-"""VerticaFlex target class."""
+"""Vertica target class."""
 
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ from target_vertica_flex.sinks import VerticaFlexSink
 
 
 class TargetVerticaFlex(SQLTarget):
-    """Target for VerticaFlex."""
+    """Target for Vertica."""
 
     def __init__(
         self,
@@ -35,7 +35,7 @@ class TargetVerticaFlex(SQLTarget):
             parse_env_config=parse_env_config,
             validate_config=validate_config,
         )
-        # There's a few ways to do this in JSON Schema, but it is schema draft dependent.
+        # There's a few ways to do this in JSON Schema but it is schema draft dependent.
         # https://stackoverflow.com/questions/38717933/jsonschema-attribute-conditionally-required # noqa: E501
         assert (self.config.get("sqlalchemy_url") is not None) or (
             self.config.get("host") is not None
@@ -94,7 +94,7 @@ class TargetVerticaFlex(SQLTarget):
             "host",
             th.StringType,
             description=(
-                "Hostname for vertica-flex instance. "
+                "Hostname for vertica instance. "
                 + "Note if sqlalchemy_url is set this will be ignored."
             ),
         ),
@@ -103,7 +103,7 @@ class TargetVerticaFlex(SQLTarget):
             th.IntegerType,
             default=5432,
             description=(
-                "The port on which vertica-flex is awaiting connection. "
+                "The port on which vertica is awaiting connection. "
                 + "Note if sqlalchemy_url is set this will be ignored."
             ),
         ),
@@ -145,7 +145,7 @@ class TargetVerticaFlex(SQLTarget):
         th.Property(
             "dialect+driver",
             th.StringType,
-            default="vertica_flex+psycopg2",
+            default="postgresql+psycopg2",
             description=(
                 "Dialect+driver see "
                 + "https://docs.sqlalchemy.org/en/20/core/engines.html. "
@@ -156,7 +156,7 @@ class TargetVerticaFlex(SQLTarget):
         th.Property(
             "default_target_schema",
             th.StringType,
-            description="VerticaFlex schema to send data to, example: tap-clickup",
+            description="Vertica schema to send data to, example: tap-clickup",
             default="melty",
         ),
         th.Property(
@@ -230,7 +230,7 @@ class TargetVerticaFlex(SQLTarget):
             th.StringType,
             default="verify-full",
             description=(
-                "SSL Protection method, see [vertica-flex documentation](https://www.vertica_flex.org/docs/current/libpq-ssl.html#LIBPQ-SSL-PROTECTION)"
+                "SSL Protection method, see [vertica documentation](https://www.verticaql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-PROTECTION)"
                 + " for more information. Must be one of disable, allow, prefer,"
                 + " require, verify-ca, or verify-full."
                 + " Note if sqlalchemy_url is set this will be ignored."
@@ -239,7 +239,7 @@ class TargetVerticaFlex(SQLTarget):
         th.Property(
             "ssl_certificate_authority",
             th.StringType,
-            default="~/.vertica_flex/root.crl",
+            default="~/.verticaql/root.crl",
             description=(
                 "The certificate authority that should be used to verify the server's"
                 + " identity. Can be provided either as the certificate itself (in"
@@ -250,7 +250,7 @@ class TargetVerticaFlex(SQLTarget):
         th.Property(
             "ssl_client_certificate",
             th.StringType,
-            default="~/.vertica_flex/vertica_flex.crt",
+            default="~/.verticaql/verticaql.crt",
             description=(
                 "The certificate that should be used to verify your identity to the"
                 + " server. Can be provided either as the certificate itself (in .env)"
@@ -261,7 +261,7 @@ class TargetVerticaFlex(SQLTarget):
         th.Property(
             "ssl_client_private_key",
             th.StringType,
-            default="~/.vertica_flex/vertica_flex.key",
+            default="~/.verticaql/verticaql.key",
             description=(
                 "The private key for the certificate you provided. Can be provided"
                 + " either as the certificate itself (in .env) or as a filepath to the"
@@ -337,4 +337,7 @@ class TargetVerticaFlex(SQLTarget):
             description="SSH Tunnel Configuration, this is a json object",
         ),
     ).to_dict()
-    default_sink_class = VerticaFlexSink
+    default_sink_class = VerticaSink
+
+if __name__ == "__main__":
+  TargetVerticaFlex.cli()

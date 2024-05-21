@@ -1,4 +1,4 @@
-"""Handles VerticaFlex interactions."""
+"""Handles Postgres interactions."""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ import simplejson
 import sqlalchemy as sa
 from singer_sdk import SQLConnector
 from singer_sdk import typing as th
-#from sqla_vertica_python import ARRAY, BIGINT, BYTEA, JSONB
+from sqlalchemy.dialects.postgresql import ARRAY, BIGINT, BYTEA, JSONB
 from sqlalchemy.engine import URL
 from sqlalchemy.engine.url import make_url
 from sqlalchemy.types import (
@@ -25,18 +25,17 @@ from sqlalchemy.types import (
     DATETIME,
     DECIMAL,
     INTEGER,
-    #TEXT,
+    TEXT,
     TIME,
     TIMESTAMP,
     VARCHAR,
     TypeDecorator,
-    BINARY
 )
 from sshtunnel import SSHTunnelForwarder
 
 
-class VerticaFlexConnector(SQLConnector):
-    """Sets up SQL Alchemy, and other VerticaFlex related stuff."""
+class PostgresConnector(SQLConnector):
+    """Sets up SQL Alchemy, and other Postgres related stuff."""
 
     allow_column_add: bool = True  # Whether ADD COLUMN is supported.
     allow_column_rename: bool = True  # Whether RENAME COLUMN is supported.
@@ -45,7 +44,7 @@ class VerticaFlexConnector(SQLConnector):
     allow_temp_tables: bool = True  # Whether temp tables are supported.
 
     def __init__(self, config: dict) -> None:
-        """Initialize a connector to a VerticaFlex database.
+        """Initialize a connector to a Postgres database.
 
         Args:
             config: Configuration for the connector.
@@ -265,7 +264,7 @@ class VerticaFlexConnector(SQLConnector):
             if picked_type is not None:
                 sql_type_array.append(picked_type)
 
-        return VerticaFlexConnector.pick_best_sql_type(sql_type_array=sql_type_array)
+        return PostgresConnector.pick_best_sql_type(sql_type_array=sql_type_array)
 
     def pick_individual_type(self, jsonschema_type: dict):
         """Select the correct sql type assuming jsonschema_type has only a single type.
@@ -279,11 +278,11 @@ class VerticaFlexConnector(SQLConnector):
         if "null" in jsonschema_type["type"]:
             return None
         if "integer" in jsonschema_type["type"]:
-            return INTEGER()
-        # if "object" in jsonschema_type["type"]:
-        #     return JSONB()
-        # if "array" in jsonschema_type["type"]:
-        #     return ARRAY(JSONB())
+            return BIGINT()
+        if "object" in jsonschema_type["type"]:
+            return JSONB()
+        if "array" in jsonschema_type["type"]:
+            return ARRAY(JSONB())
 
         # string formats
         if jsonschema_type.get("format") == "date-time":
@@ -294,8 +293,8 @@ class VerticaFlexConnector(SQLConnector):
         ):
             return HexByteString()
         individual_type = th.to_sql_type(jsonschema_type)
-        # if isinstance(individual_type, VARCHAR):
-        #     return TEXT()
+        if isinstance(individual_type, VARCHAR):
+            return TEXT()
         return individual_type
 
     @staticmethod
@@ -310,15 +309,15 @@ class VerticaFlexConnector(SQLConnector):
         """
         precedence_order = [
             HexByteString,
-            #ARRAY,
-            #JSONB,
-            #TEXT,
+            ARRAY,
+            JSONB,
+            TEXT,
             TIMESTAMP,
             DATETIME,
             DATE,
             TIME,
             DECIMAL,
-            #BIGINT,
+            BIGINT,
             INTEGER,
             BOOLEAN,
             NOTYPE,
@@ -328,8 +327,7 @@ class VerticaFlexConnector(SQLConnector):
             for obj in sql_type_array:
                 if isinstance(obj, sql_type):
                     return obj
-        #return TEXT()
-        return VARCHAR()
+        return TEXT()
 
     def create_empty_table(  # type: ignore[override]
         self,
@@ -376,7 +374,7 @@ class VerticaFlexConnector(SQLConnector):
                     property_name,
                     self.to_sql_type(property_jsonschema),
                     primary_key=is_primary_key,
-                    autoincrement=False,  # See: https://github.com/MeltanoLabs/target-vertica-flex/issues/193 # noqa: E501
+                    autoincrement=False,  # See: https://github.com/MeltanoLabs/target-postgres/issues/193 # noqa: E501
                 )
             )
         if as_temp_table:
@@ -835,8 +833,7 @@ class VerticaFlexConnector(SQLConnector):
 class NOTYPE(TypeDecorator):
     """Type to use when none is provided in the schema."""
 
-    #impl = TEXT
-    impl = VARCHAR
+    impl = TEXT
     cache_ok = True
 
     def process_bind_param(self, value, dialect):
@@ -855,8 +852,7 @@ class NOTYPE(TypeDecorator):
 
     def as_generic(self, *args: t.Any, **kwargs: t.Any):
         """Return the generic type for this column."""
-        #return TEXT()
-        return VARCHAR()
+        return TEXT()
 
 
 class HexByteString(TypeDecorator):
@@ -869,8 +865,7 @@ class HexByteString(TypeDecorator):
     is supported although it's not part of the standard.
     """
 
-    #impl = BYTEA
-    impl = BINARY
+    impl = BYTEA
 
     def process_bind_param(self, value, dialect):
         """Convert hex string to bytes."""

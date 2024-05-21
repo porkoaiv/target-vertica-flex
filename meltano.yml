@@ -22,7 +22,7 @@ plugins:
 
       flattening_enabled: false
       flattening_max_depth: 1
-      hard_delete: true
+      #hard_delete: false
       interpret_content_encoding: true
       load_method: append-only
       sqlalchemy_url: ''

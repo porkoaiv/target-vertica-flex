@@ -1,4 +1,4 @@
-"""VerticaFlex target sink class, which handles writing streams."""
+"""Postgres target sink class, which handles writing streams."""
 
 import uuid
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Union, cast
@@ -9,13 +9,13 @@ from singer_sdk.sinks import SQLSink
 from sqlalchemy.sql import Executable
 from sqlalchemy.sql.expression import bindparam
 
-from target_vertica_flex.connector import VerticaFlexConnector
+from target_postgres.connector import PostgresConnector
 
 
-class VerticaFlexSink(SQLSink):
-    """VerticaFlex target sink class."""
+class PostgresSink(SQLSink):
+    """Postgres target sink class."""
 
-    connector_class = VerticaFlexConnector
+    connector_class = PostgresConnector
 
     def __init__(self, *args, **kwargs):
         """Initialize SQL Sink. See super class for more details."""
@@ -33,13 +33,13 @@ class VerticaFlexSink(SQLSink):
         self._append_only = value
 
     @property
-    def connector(self) -> VerticaFlexConnector:
+    def connector(self) -> PostgresConnector:
         """Return the connector object.
 
         Returns:
             The connector object.
         """
-        return cast(VerticaFlexConnector, self._connector)
+        return cast(PostgresConnector, self._connector)
 
     def setup(self) -> None:
         """Set up Sink.
@@ -113,7 +113,7 @@ class VerticaFlexSink(SQLSink):
         # 'temp_test_optional_attributes_388470e9_fbd0_47b7_a52f_d32a2ee3f5f6'
         # exceeds maximum length of 63 characters
         # Is hit if we have a long table name, there is no limit on Temporary tables
-        # in vertica-flex, used a guid just in case we are using the same session
+        # in postgres, used a guid just in case we are using the same session
         return f"{str(uuid.uuid4()).replace('-', '_')}"
 
     def bulk_insert_records(  # type: ignore[override]

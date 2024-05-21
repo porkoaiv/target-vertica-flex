@@ -1,1 +1,1 @@
-"""Init postgres."""
+"""Init vertica-flex."""

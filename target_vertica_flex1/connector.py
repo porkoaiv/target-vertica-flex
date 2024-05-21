@@ -1,4 +1,9 @@
-"""Handles VerticaFlex interactions."""
+"""Handles Vertica interactions."""
+
+# 3 class, def 26,3,1
+
+
+
 
 from __future__ import annotations
 
@@ -13,30 +18,44 @@ from typing import cast
 
 import paramiko
 import simplejson
-import sqlalchemy as sa
+
 from singer_sdk import SQLConnector
 from singer_sdk import typing as th
-#from sqla_vertica_python import ARRAY, BIGINT, BYTEA, JSONB
+
+import sqla_vertica_python as sa1
+import vertica_python
+
+import sqlalchemy as sa
+from sqlalchemy.dialects.postgresql import ARRAY, BIGINT, BYTEA, JSONB
 from sqlalchemy.engine import URL
 from sqlalchemy.engine.url import make_url
 from sqlalchemy.types import (
+    BLOB,
     BOOLEAN,
+    CHAR,
+    VARCHAR,
     DATE,
     DATETIME,
-    DECIMAL,
-    INTEGER,
-    #TEXT,
     TIME,
     TIMESTAMP,
-    VARCHAR,
-    TypeDecorator,
-    BINARY
+    #INTERVAL,
+    FLOAT,
+    INTEGER,
+    NUMERIC,
 )
+
 from sshtunnel import SSHTunnelForwarder
+from sqlalchemy.types import TypeDecorator
 
+#LOGGER = get_logger('target_vertica_flex')
 
-class VerticaFlexConnector(SQLConnector):
-    """Sets up SQL Alchemy, and other VerticaFlex related stuff."""
+# ========= STREAM UTILS BELOW =========
+
+DEFAULT_VARCHAR_LENGTH = 1024
+LONG_VARCHAR_LENGTH = 65000
+
+class VerticaConnector(SQLConnector):
+    """Sets up SQL Alchemy, and other Vertica related stuff."""
 
     allow_column_add: bool = True  # Whether ADD COLUMN is supported.
     allow_column_rename: bool = True  # Whether RENAME COLUMN is supported.
@@ -45,7 +64,7 @@ class VerticaFlexConnector(SQLConnector):
     allow_temp_tables: bool = True  # Whether temp tables are supported.
 
     def __init__(self, config: dict) -> None:
-        """Initialize a connector to a VerticaFlex database.
+        """Initialize a connector to a Vertica database.
 
         Args:
             config: Configuration for the connector.
@@ -94,13 +113,13 @@ class VerticaFlexConnector(SQLConnector):
         return self.config.get("interpret_content_encoding", False)
 
     def prepare_table(  # type: ignore[override]
-        self,
-        full_table_name: str,
-        schema: dict,
-        primary_keys: t.Sequence[str],
-        connection: sa.engine.Connection,
-        partition_keys: list[str] | None = None,
-        as_temp_table: bool = False,
+            self,
+            full_table_name: str,
+            schema: dict,
+            primary_keys: t.Sequence[str],
+            connection: sa.engine.Connection,
+            partition_keys: list[str] | None = None,
+            as_temp_table: bool = False,
     ) -> sa.Table:
         """Adapt target table to provided schema if possible.
 
@@ -155,11 +174,11 @@ class VerticaFlexConnector(SQLConnector):
         return meta.tables[full_table_name]
 
     def copy_table_structure(
-        self,
-        full_table_name: str,
-        from_table: sa.Table,
-        connection: sa.engine.Connection,
-        as_temp_table: bool = False,
+            self,
+            full_table_name: str,
+            from_table: sa.Table,
+            connection: sa.engine.Connection,
+            as_temp_table: bool = False,
     ) -> sa.Table:
         """Copy table structure.
 
@@ -182,6 +201,8 @@ class VerticaFlexConnector(SQLConnector):
             columns.append(column._copy())
         if as_temp_table:
             new_table = sa.Table(table_name, meta, *columns, prefixes=["TEMPORARY"])
+            #new_table = sa.Table(table_name, meta, *columns, prefixes=["TEMPORARY","FLEX"])
+            #new_table = sa.Table(table_name, meta, *columns, prefixes=["FLEX"])
             new_table.create(bind=connection)
             return new_table
         else:
@@ -199,7 +220,7 @@ class VerticaFlexConnector(SQLConnector):
         table.drop(bind=connection)
 
     def clone_table(
-        self, new_table_name, table, metadata, connection, temp_table
+            self, new_table_name, table, metadata, connection, temp_table
     ) -> sa.Table:
         """Clone a table."""
         new_columns = []
@@ -265,9 +286,52 @@ class VerticaFlexConnector(SQLConnector):
             if picked_type is not None:
                 sql_type_array.append(picked_type)
 
-        return VerticaFlexConnector.pick_best_sql_type(sql_type_array=sql_type_array)
+        return VerticaConnector.pick_best_sql_type(sql_type_array=sql_type_array)
 
     def pick_individual_type(self, jsonschema_type: dict):
+
+        property_type = jsonschema_type['type']
+        property_format = jsonschema_type['format'] if 'format' in jsonschema_type else None
+        col_type = 'varchar'
+        varchar_length = DEFAULT_VARCHAR_LENGTH
+        if jsonschema_type.get('maxLength', 0) > varchar_length:
+            varchar_length = LONG_VARCHAR_LENGTH
+        if 'object' in property_type or 'array' in property_type:
+            if jsonschema_type.get('maxLength', 0) > LONG_VARCHAR_LENGTH:
+                col_type = 'long varchar'
+                varchar_length = '1048576'
+            else:
+                varchar_length = LONG_VARCHAR_LENGTH
+
+        # Every date-time JSON value is currently mapped to TIMESTAMP
+        elif property_format == 'date-time':
+            col_type = 'timestamp'
+        elif property_format == 'time':
+            col_type = 'time'
+        elif 'number' in property_type:
+            col_type = 'numeric'
+        elif 'integer' in property_type and 'string' in property_type:
+            col_type = 'varchar'
+        elif 'integer' in property_type:
+            if 'maximum' in jsonschema_type:
+                if jsonschema_type['maximum'] <= 32767:
+                    col_type = 'smallint'
+                elif jsonschema_type['maximum'] <= 2147483647:
+                    col_type = 'int'
+                elif jsonschema_type['maximum'] <= 9223372036854775807:
+                    col_type = 'bigint'
+            else:
+                col_type = 'int'
+        elif 'boolean' in property_type:
+            col_type = 'boolean'
+
+        # Add max length to column type if required
+        #if with_length:
+        if col_type == 'varchar' and varchar_length > 0:
+            col_type = '{}({})'.format(col_type, varchar_length)
+
+        self.logger.info("jsonschema_type: %s -> col_type: %s", jsonschema_type, col_type)
+
         """Select the correct sql type assuming jsonschema_type has only a single type.
 
         Args:
@@ -278,8 +342,9 @@ class VerticaFlexConnector(SQLConnector):
         """
         if "null" in jsonschema_type["type"]:
             return None
-        if "integer" in jsonschema_type["type"]:
-            return INTEGER()
+
+        # if "integer" in jsonschema_type["type"]:
+        #     return BIGINT()
         # if "object" in jsonschema_type["type"]:
         #     return JSONB()
         # if "array" in jsonschema_type["type"]:
@@ -288,14 +353,16 @@ class VerticaFlexConnector(SQLConnector):
         # string formats
         if jsonschema_type.get("format") == "date-time":
             return TIMESTAMP()
-        if (
-            self.interpret_content_encoding
-            and jsonschema_type.get("contentEncoding") == "base16"
-        ):
-            return HexByteString()
+        # if (
+        #         self.interpret_content_encoding
+        #         and jsonschema_type.get("contentEncoding") == "base16"
+        # ):
+        #     return HexByteString()
+
         individual_type = th.to_sql_type(jsonschema_type)
         # if isinstance(individual_type, VARCHAR):
         #     return TEXT()
+
         return individual_type
 
     @staticmethod
@@ -309,37 +376,35 @@ class VerticaFlexConnector(SQLConnector):
             An instance of the best SQL type class based on defined precedence order.
         """
         precedence_order = [
-            HexByteString,
-            #ARRAY,
-            #JSONB,
-            #TEXT,
-            TIMESTAMP,
-            DATETIME,
-            DATE,
-            TIME,
-            DECIMAL,
-            #BIGINT,
-            INTEGER,
+            BLOB,
             BOOLEAN,
-            NOTYPE,
+            CHAR,
+            VARCHAR,
+            DATE,
+            DATETIME,
+            TIME,
+            TIMESTAMP,
+            # INTERVAL,
+            FLOAT,
+            INTEGER,
+            NUMERIC,
         ]
 
         for sql_type in precedence_order:
             for obj in sql_type_array:
                 if isinstance(obj, sql_type):
                     return obj
-        #return TEXT()
-        return VARCHAR()
+        return obj
 
     def create_empty_table(  # type: ignore[override]
-        self,
-        table_name: str,
-        meta: sa.MetaData,
-        schema: dict,
-        connection: sa.engine.Connection,
-        primary_keys: t.Sequence[str] | None = None,
-        partition_keys: list[str] | None = None,
-        as_temp_table: bool = False,
+            self,
+            table_name: str,
+            meta: sa.MetaData,
+            schema: dict,
+            connection: sa.engine.Connection,
+            primary_keys: t.Sequence[str] | None = None,
+            partition_keys: list[str] | None = None,
+            as_temp_table: bool = False,
     ) -> sa.Table:
         """Create an empty target table.
 
@@ -376,7 +441,7 @@ class VerticaFlexConnector(SQLConnector):
                     property_name,
                     self.to_sql_type(property_jsonschema),
                     primary_key=is_primary_key,
-                    autoincrement=False,  # See: https://github.com/MeltanoLabs/target-vertica-flex/issues/193 # noqa: E501
+                    autoincrement=False,  # See: https://github.com/MeltanoLabs/target-vertica/issues/193 # noqa: E501
                 )
             )
         if as_temp_table:
@@ -389,12 +454,12 @@ class VerticaFlexConnector(SQLConnector):
         return new_table
 
     def prepare_column(
-        self,
-        full_table_name: str,
-        column_name: str,
-        sql_type: sa.types.TypeEngine,
-        connection: sa.engine.Connection | None = None,
-        column_object: sa.Column | None = None,
+            self,
+            full_table_name: str,
+            column_name: str,
+            sql_type: sa.types.TypeEngine,
+            connection: sa.engine.Connection | None = None,
+            column_object: sa.Column | None = None,
     ) -> None:
         """Adapt target table to provided schema if possible.
 
@@ -437,12 +502,12 @@ class VerticaFlexConnector(SQLConnector):
         )
 
     def _create_empty_column(  # type: ignore[override]
-        self,
-        schema_name: str,
-        table_name: str,
-        column_name: str,
-        sql_type: sa.types.TypeEngine,
-        connection: sa.engine.Connection,
+            self,
+            schema_name: str,
+            table_name: str,
+            column_name: str,
+            sql_type: sa.types.TypeEngine,
+            connection: sa.engine.Connection,
     ) -> None:
         """Create a new column.
 
@@ -469,11 +534,11 @@ class VerticaFlexConnector(SQLConnector):
         connection.execute(column_add_ddl)
 
     def get_column_add_ddl(  # type: ignore[override]
-        self,
-        table_name: str,
-        schema_name: str,
-        column_name: str,
-        column_type: sa.types.TypeEngine,
+            self,
+            table_name: str,
+            schema_name: str,
+            column_name: str,
+            column_type: sa.types.TypeEngine,
     ) -> sa.DDL:
         """Get the create column DDL statement.
 
@@ -502,13 +567,13 @@ class VerticaFlexConnector(SQLConnector):
         )
 
     def _adapt_column_type(  # type: ignore[override]
-        self,
-        schema_name: str,
-        table_name: str,
-        column_name: str,
-        sql_type: sa.types.TypeEngine,
-        connection: sa.engine.Connection,
-        column_object: sa.Column | None,
+            self,
+            schema_name: str,
+            table_name: str,
+            column_name: str,
+            sql_type: sa.types.TypeEngine,
+            connection: sa.engine.Connection,
+            column_object: sa.Column | None,
     ) -> None:
         """Adapt table column type to support the new JSON schema type.
 
@@ -572,11 +637,11 @@ class VerticaFlexConnector(SQLConnector):
         connection.execute(alter_column_ddl)
 
     def get_column_alter_ddl(  # type: ignore[override]
-        self,
-        schema_name: str,
-        table_name: str,
-        column_name: str,
-        column_type: sa.types.TypeEngine,
+            self,
+            schema_name: str,
+            table_name: str,
+            column_name: str,
+            column_type: sa.types.TypeEngine,
     ) -> sa.DDL:
         """Get the alter column DDL statement.
 
@@ -661,10 +726,10 @@ class VerticaFlexConnector(SQLConnector):
         return query
 
     def filepath_or_certificate(
-        self,
-        value: str,
-        alternative_name: str,
-        restrict_permissions: bool = False,
+            self,
+            value: str,
+            alternative_name: str,
+            restrict_permissions: bool = False,
     ) -> str:
         """Provide the appropriate key-value pair based on a filepath or raw value.
 
@@ -709,10 +774,10 @@ class VerticaFlexConnector(SQLConnector):
             ValueError: If the key type could not be determined.
         """
         for key_class in (
-            paramiko.RSAKey,
-            paramiko.DSSKey,
-            paramiko.ECDSAKey,
-            paramiko.Ed25519Key,
+                paramiko.RSAKey,
+                paramiko.DSSKey,
+                paramiko.ECDSAKey,
+                paramiko.Ed25519Key,
         ):
             try:
                 key = key_class.from_private_key(io.StringIO(key_data))  # type: ignore[attr-defined]
@@ -739,11 +804,11 @@ class VerticaFlexConnector(SQLConnector):
         exit(1)  # Calling this to be sure atexit is called, so clean_up gets called
 
     def _get_column_type(  # type: ignore[override]
-        self,
-        schema_name: str,
-        table_name: str,
-        column_name: str,
-        connection: sa.engine.Connection,
+            self,
+            schema_name: str,
+            table_name: str,
+            column_name: str,
+            connection: sa.engine.Connection,
     ) -> sa.types.TypeEngine:
         """Get the SQL type of the declared column.
 
@@ -775,11 +840,11 @@ class VerticaFlexConnector(SQLConnector):
         return t.cast(sa.types.TypeEngine, column.type)
 
     def get_table_columns(  # type: ignore[override]
-        self,
-        schema_name: str,
-        table_name: str,
-        connection: sa.engine.Connection,
-        column_names: list[str] | None = None,
+            self,
+            schema_name: str,
+            table_name: str,
+            connection: sa.engine.Connection,
+            column_names: list[str] | None = None,
     ) -> dict[str, sa.Column]:
         """Return a list of table columns.
 
@@ -805,14 +870,14 @@ class VerticaFlexConnector(SQLConnector):
             )
             for col_meta in columns
             if not column_names
-            or col_meta["name"].casefold() in {col.casefold() for col in column_names}
+               or col_meta["name"].casefold() in {col.casefold() for col in column_names}
         }
 
     def column_exists(  # type: ignore[override]
-        self,
-        full_table_name: str,
-        column_name: str,
-        connection: sa.engine.Connection,
+            self,
+            full_table_name: str,
+            column_name: str,
+            connection: sa.engine.Connection,
     ) -> bool:
         """Determine if the target column already exists.
 
@@ -835,7 +900,6 @@ class VerticaFlexConnector(SQLConnector):
 class NOTYPE(TypeDecorator):
     """Type to use when none is provided in the schema."""
 
-    #impl = TEXT
     impl = VARCHAR
     cache_ok = True
 
@@ -855,8 +919,8 @@ class NOTYPE(TypeDecorator):
 
     def as_generic(self, *args: t.Any, **kwargs: t.Any):
         """Return the generic type for this column."""
-        #return TEXT()
-        return VARCHAR()
+        # return TEXT()
+        return VARCHAR
 
 
 class HexByteString(TypeDecorator):
@@ -869,8 +933,8 @@ class HexByteString(TypeDecorator):
     is supported although it's not part of the standard.
     """
 
-    #impl = BYTEA
-    impl = BINARY
+    #
+    # impl = BYTEA
 
     def process_bind_param(self, value, dialect):
         """Convert hex string to bytes."""
@@ -889,10 +953,10 @@ class HexByteString(TypeDecorator):
             except ValueError as ex:
                 raise ValueError(f"Invalid hexadecimal string: {value}") from ex
 
-        if not isinstance(value, bytearray | memoryview | bytes):
-            raise TypeError(
-                "HexByteString columns support only bytes or hex string values. "
-                f"{type(value)} is not supported"
-            )
+        # if not isinstance(value, bytearray | memoryview | bytes):
+        #     raise TypeError(
+        #         "HexByteString columns support only bytes or hex string values. "
+        #         f"{type(value)} is not supported"
+        #     )
 
         return value
