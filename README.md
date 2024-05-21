@@ -1,11 +1,11 @@
-# `target-vertica`
+# `target-vertica-flex`
 
-![PyPI - Version](https://img.shields.io/pypi/v/meltanolabs-target-vertica)
-![PyPI - Downloads](https://img.shields.io/pypi/dm/meltanolabs-target-vertica)
-![PyPI - License](https://img.shields.io/pypi/l/meltanolabs-target-vertica)
-![Test target-vertica](https://github.com/meltanolabs/target-vertica/actions/workflows/ci_workflow.yml/badge.svg)
+![PyPI - Version](https://img.shields.io/pypi/v/target-postgres)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/target-postgres)
+![PyPI - License](https://img.shields.io/pypi/l/target-postgres)
+![Test target-vertica-flex](https://github.com/meltanolabs/target-postgres/actions/workflows/ci_workflow.yml/badge.svg)
 
-Target for Vertica.
+Target for VerticaFlex.
 
 Built with the [Meltano SDK](https://sdk.meltano.com) for Singer Taps and Targets.
 
@@ -16,44 +16,44 @@ Built with the [Meltano SDK](https://sdk.meltano.com) for Singer Taps and Target
 * `schema-flattening`
 
 ## Settings
-| Setting                      | Required | Default | Description |
-|:-----------------------------|:--------:|:-------:|:------------|
-| host                         | False    | None    | Hostname for vertica instance. Note if sqlalchemy_url is set this will be ignored. |
-| port                         | False    |    5432 | The port on which vertica is awaiting connection. Note if sqlalchemy_url is set this will be ignored. |
-| user                         | False    | None    | User name used to authenticate. Note if sqlalchemy_url is set this will be ignored. |
-| password                     | False    | None    | Password used to authenticate. Note if sqlalchemy_url is set this will be ignored. |
-| database                     | False    | None    | Database name. Note if sqlalchemy_url is set this will be ignored. |
-| sqlalchemy_url               | False    | None    | SQLAlchemy connection string. This will override using host, user, password, port, dialect, and all ssl settings. Note that you must escape password special characters properly. See https://docs.sqlalchemy.org/en/20/core/engines.html#escaping-special-characters-such-as-signs-in-passwords |
-| dialect+driver               | False    | verticaql+psycopg2 | Dialect+driver see https://docs.sqlalchemy.org/en/20/core/engines.html. Generally just leave this alone. Note if sqlalchemy_url is set this will be ignored. |
-| default_target_schema        | False    | melty   | Vertica schema to send data to, example: tap-clickup |
-| activate_version             | False    |    True | If set to false, the tap will ignore activate version messages. If set to true, add_record_metadata must be set to true as well. |
-| hard_delete                  | False    |   False | When activate version is sent from a tap this specefies if we should delete the records that don't match, or mark them with a date in the `_sdc_deleted_at` column. This config option is ignored if `activate_version` is set to false. |
-| add_record_metadata          | False    |    True | Note that this must be enabled for activate_version to work!This adds _sdc_extracted_at, _sdc_batched_at, and more to every table. See https://sdk.meltano.com/en/latest/implementation/record_metadata.html for more information. |
-| ssl_enable                   | False    |   False | Whether or not to use ssl to verify the server's identity. Use ssl_certificate_authority and ssl_mode for further customization. To use a client certificate to authenticate yourself to the server, use ssl_client_certificate_enable instead. Note if sqlalchemy_url is set this will be ignored. |
-| ssl_client_certificate_enable| False    |   False | Whether or not to provide client-side certificates as a method of authentication to the server. Use ssl_client_certificate and ssl_client_private_key for further customization. To use SSL to verify the server's identity, use ssl_enable instead. Note if sqlalchemy_url is set this will be ignored. |
-| ssl_mode                     | False    | verify-full | SSL Protection method, see [vertica documentation](https://www.verticaql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-PROTECTION) for more information. Must be one of disable, allow, prefer, require, verify-ca, or verify-full. Note if sqlalchemy_url is set this will be ignored. |
-| ssl_certificate_authority    | False    | ~/.verticaql/root.crl | The certificate authority that should be used to verify the server's identity. Can be provided either as the certificate itself (in .env) or as a filepath to the certificate. Note if sqlalchemy_url is set this will be ignored. |
-| ssl_client_certificate       | False    | ~/.verticaql/verticaql.crt | The certificate that should be used to verify your identity to the server. Can be provided either as the certificate itself (in .env) or as a filepath to the certificate. Note if sqlalchemy_url is set this will be ignored. |
-| ssl_client_private_key       | False    | ~/.verticaql/verticaql.key | The private key for the certificate you provided. Can be provided either as the certificate itself (in .env) or as a filepath to the certificate. Note if sqlalchemy_url is set this will be ignored. |
-| ssl_storage_directory        | False    | .secrets | The folder in which to store SSL certificates provided as raw values. When a certificate/key is provided as a raw value instead of as a filepath, it must be written to a file before it can be used. This configuration option determines where that file is created. |
-| ssh_tunnel                   | False    | None    | SSH Tunnel Configuration, this is a json object |
-| ssh_tunnel.enable | True (if ssh_tunnel set) | False | Enable an ssh tunnel (also known as bastion host), see the other ssh_tunnel.* properties for more details.
-| ssh_tunnel.host | True (if ssh_tunnel set) | False | Host of the bastion host, this is the host we'll connect to via ssh
-| ssh_tunnel.username | True (if ssh_tunnel set) | False |Username to connect to bastion host
-| ssh_tunnel.port | True (if ssh_tunnel set) | 22 | Port to connect to bastion host
-| ssh_tunnel.private_key | True (if ssh_tunnel set) | None | Private Key for authentication to the bastion host
-| ssh_tunnel.private_key_password | False | None | Private Key Password, leave None if no password is set
-| stream_maps                  | False    | None    | Config object for stream maps capability. For more information check out [Stream Maps](https://sdk.meltano.com/en/latest/stream_maps.html). |
-| stream_map_config            | False    | None    | User-defined config values to be used within map expressions. |
-| flattening_enabled           | False    | None    | 'True' to enable schema flattening and automatically expand nested properties. |
-| flattening_max_depth         | False    | None    | The max depth to flatten schemas. |
+| Setting                      | Required |          Default           | Description |
+|:-----------------------------|:--------:|:--------------------------:|:------------|
+| host                         | False    |            None            | Hostname for vertica instance. Note if sqlalchemy_url is set this will be ignored. |
+| port                         | False    |            5432            | The port on which vertica is awaiting connection. Note if sqlalchemy_url is set this will be ignored. |
+| user                         | False    |            None            | User name used to authenticate. Note if sqlalchemy_url is set this will be ignored. |
+| password                     | False    |            None            | Password used to authenticate. Note if sqlalchemy_url is set this will be ignored. |
+| database                     | False    |            None            | Database name. Note if sqlalchemy_url is set this will be ignored. |
+| sqlalchemy_url               | False    |            None            | SQLAlchemy connection string. This will override using host, user, password, port, dialect, and all ssl settings. Note that you must escape password special characters properly. See https://docs.sqlalchemy.org/en/20/core/engines.html#escaping-special-characters-such-as-signs-in-passwords |
+| dialect+driver               | False    |   vertica+vertica_python   | Dialect+driver see https://docs.sqlalchemy.org/en/20/core/engines.html. Generally just leave this alone. Note if sqlalchemy_url is set this will be ignored. |
+| default_target_schema        | False    |           melty            | Vertica schema to send data to, example: tap-clickup |
+| activate_version             | False    |            True            | If set to false, the tap will ignore activate version messages. If set to true, add_record_metadata must be set to true as well. |
+| hard_delete                  | False    |           False            | When activate version is sent from a tap this specefies if we should delete the records that don't match, or mark them with a date in the `_sdc_deleted_at` column. This config option is ignored if `activate_version` is set to false. |
+| add_record_metadata          | False    |            True            | Note that this must be enabled for activate_version to work!This adds _sdc_extracted_at, _sdc_batched_at, and more to every table. See https://sdk.meltano.com/en/latest/implementation/record_metadata.html for more information. |
+| ssl_enable                   | False    |           False            | Whether or not to use ssl to verify the server's identity. Use ssl_certificate_authority and ssl_mode for further customization. To use a client certificate to authenticate yourself to the server, use ssl_client_certificate_enable instead. Note if sqlalchemy_url is set this will be ignored. |
+| ssl_client_certificate_enable| False    |           False            | Whether or not to provide client-side certificates as a method of authentication to the server. Use ssl_client_certificate and ssl_client_private_key for further customization. To use SSL to verify the server's identity, use ssl_enable instead. Note if sqlalchemy_url is set this will be ignored. |
+| ssl_mode                     | False    |        verify-full         | SSL Protection method, see [vertica documentation](https://www.vertica.org/docs/current/libpq-ssl.html#LIBPQ-SSL-PROTECTION) for more information. Must be one of disable, allow, prefer, require, verify-ca, or verify-full. Note if sqlalchemy_url is set this will be ignored. |
+| ssl_certificate_authority    | False    |   ~/.vertica/root.crl    | The certificate authority that should be used to verify the server's identity. Can be provided either as the certificate itself (in .env) or as a filepath to the certificate. Note if sqlalchemy_url is set this will be ignored. |
+| ssl_client_certificate       | False    | ~/.vertica/vertica.crt | The certificate that should be used to verify your identity to the server. Can be provided either as the certificate itself (in .env) or as a filepath to the certificate. Note if sqlalchemy_url is set this will be ignored. |
+| ssl_client_private_key       | False    | ~/.vertica/vertica.key | The private key for the certificate you provided. Can be provided either as the certificate itself (in .env) or as a filepath to the certificate. Note if sqlalchemy_url is set this will be ignored. |
+| ssl_storage_directory        | False    |          .secrets          | The folder in which to store SSL certificates provided as raw values. When a certificate/key is provided as a raw value instead of as a filepath, it must be written to a file before it can be used. This configuration option determines where that file is created. |
+| ssh_tunnel                   | False    |            None            | SSH Tunnel Configuration, this is a json object |
+| ssh_tunnel.enable | True (if ssh_tunnel set) |           False            | Enable an ssh tunnel (also known as bastion host), see the other ssh_tunnel.* properties for more details.
+| ssh_tunnel.host | True (if ssh_tunnel set) |           False            | Host of the bastion host, this is the host we'll connect to via ssh
+| ssh_tunnel.username | True (if ssh_tunnel set) |           False            |Username to connect to bastion host
+| ssh_tunnel.port | True (if ssh_tunnel set) |             22             | Port to connect to bastion host
+| ssh_tunnel.private_key | True (if ssh_tunnel set) |            None            | Private Key for authentication to the bastion host
+| ssh_tunnel.private_key_password | False |            None            | Private Key Password, leave None if no password is set
+| stream_maps                  | False    |            None            | Config object for stream maps capability. For more information check out [Stream Maps](https://sdk.meltano.com/en/latest/stream_maps.html). |
+| stream_map_config            | False    |            None            | User-defined config values to be used within map expressions. |
+| flattening_enabled           | False    |            None            | 'True' to enable schema flattening and automatically expand nested properties. |
+| flattening_max_depth         | False    |            None            | The max depth to flatten schemas. |
 
-A full list of supported settings and capabilities is available by running: `target-vertica --about`
+A full list of supported settings and capabilities is available by running: `target-vertica-flex --about`
 
 ## Installation
 
 ```bash
-pipx install meltanolabs-target-vertica
+pipx install target-vertica-flex
 ```
 
 ## Configuration
@@ -62,9 +62,9 @@ pipx install meltanolabs-target-vertica
 
 There are two distinct processes which both fall under the banner of SSL. One process occurs when the client wishes to ensure the identity of the server, and is the more common reason that SSL is used. Another is when the server wishes to ensure the identity of the client, for authentication/authorization purposes.
 
-If your server is set up with a certificate and private key, and you wish to check their certificate against a root certificate which you posess, use `ssl_enable`. You may then further customize this process using the `ssl_certificate_authority` and `ssl_mode` settings. See the [documentation](https://www.verticaql.org/docs/current/libpq-ssl.html#LIBQ-SSL-CERTIFICATES) for further details.
+If your server is set up with a certificate and private key, and you wish to check their certificate against a root certificate which you posess, use `ssl_enable`. You may then further customize this process using the `ssl_certificate_authority` and `ssl_mode` settings. See the [documentation](https://www.vertica.org/docs/current/libpq-ssl.html#LIBQ-SSL-CERTIFICATES) for further details.
 
-If your server is set up with a root certificate, and you wish to provide a certificate to the server to verify your identity, use `ssl_client_certificate_enable`. You may then further customize this process using the `ssl_client_certificate` and `ssl_client_private_key` settings. See the [documentation](https://www.verticaql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-CLIENTCERT) for further details.
+If your server is set up with a root certificate, and you wish to provide a certificate to the server to verify your identity, use `ssl_client_certificate_enable`. You may then further customize this process using the `ssl_client_certificate` and `ssl_client_private_key` settings. See the [documentation](https://www.vertica.org/docs/current/libpq-ssl.html#LIBPQ-SSL-CLIENTCERT) for further details.
 
 ### Configure using environment variables
 
@@ -81,16 +81,16 @@ The database account provided must have access to:
 
 ## Usage
 
-You can easily run `target-vertica` by itself or in a pipeline using [Meltano](https://meltano.com/).
+You can easily run `target-vertica-flex` by itself or in a pipeline using [Meltano](https://meltano.com/).
 
 ### Executing the Target Directly
 
 ```bash
-target-vertica --version
-target-vertica --help
+target-vertica-flex --version
+target-vertica-flex --help
 # Test using the "Carbon Intensity" sample:
 pipx install git+https://gitlab.com/meltano/tap-carbon-intensity
-tap-carbon-intensity | target-vertica --config /path/to/target-vertica-config.json
+tap-carbon-intensity | target-vertica-flex --config /path/to/target-vertica-flex-config.json
 ```
 
 ### Using Docker Compose
@@ -128,10 +128,10 @@ Create tests within the `target_vertica/tests` subfolder and
 poetry run pytest
 ```
 
-You can also test the `target-vertica` CLI interface directly using `poetry run`:
+You can also test the `target-vertica-flex` CLI interface directly using `poetry run`:
 
 ```bash
-poetry run target-vertica --help
+poetry run target-vertica-flex --help
 ```
 
 ### Testing with [Meltano](https://meltano.com/)
@@ -154,7 +154,7 @@ Now you can test and orchestrate using Meltano:
 
 ```bash
 # Test invocation:
-meltano invoke target-vertica --version
+meltano invoke target-vertica-flex --version
 ```
 
 ### SDK Dev Guide
