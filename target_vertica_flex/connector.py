@@ -853,7 +853,8 @@ class NOTYPE(TypeDecorator):
 
     def as_generic(self, *args: t.Any, **kwargs: t.Any):
         """Return the generic type for this column."""
-        return TEXT()
+        #return TEXT()
+        return VARCHAR()
 
 
 # class HexByteString(TypeDecorator):

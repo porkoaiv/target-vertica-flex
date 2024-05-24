@@ -5,25 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5c0d037d-131b-4775-8b81-fe40ee4d935e" name="Changes" comment="init">
-      <change afterPath="$PROJECT_DIR$/target_vertica_flex.after.replace/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/target_vertica_flex.after.replace/connector.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/target_vertica_flex.after.replace/sinks.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/target_vertica_flex.after.replace/target.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/target_vertica_flex.latest/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/target_vertica_flex.latest/connector.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/target_vertica_flex.latest/sinks.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/target_vertica_flex.latest/target.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target_vertica_flex.org/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/target_vertica_flex.TargetPostgres/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target_vertica_flex.org/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/target_vertica_flex.TargetPostgres/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target_vertica_flex.org/connector.py" beforeDir="false" afterPath="$PROJECT_DIR$/target_vertica_flex.TargetPostgres/connector.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target_vertica_flex.org/sinks.py" beforeDir="false" afterPath="$PROJECT_DIR$/target_vertica_flex.TargetPostgres/sinks.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target_vertica_flex.org/target.py" beforeDir="false" afterPath="$PROJECT_DIR$/target_vertica_flex.TargetPostgres/target.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target_vertica_flex/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/target_vertica_flex.latest/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target_vertica_flex/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/target_vertica_flex/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target_vertica_flex/connector.py" beforeDir="false" afterPath="$PROJECT_DIR$/target_vertica_flex/connector.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target_vertica_flex/sinks.py" beforeDir="false" afterPath="$PROJECT_DIR$/target_vertica_flex/sinks.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target_vertica_flex/target.py" beforeDir="false" afterPath="$PROJECT_DIR$/target_vertica_flex/target.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -113,7 +97,14 @@
       <option name="presentableId" value="LOCAL−00001" />
       <updated>1716535444348</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL−00002" summary="init">
+      <option name="closed" value="true" />
+      <created>1716537732931</created>
+      <option name="number" value="LOCAL−00002" />
+      <option name="presentableId" value="LOCAL−00002" />
+      <updated>1716537732931</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
