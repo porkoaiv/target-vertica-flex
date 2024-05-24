@@ -32,9 +32,12 @@ packages = [
 
 [tool.poetry.dependencies]
 python = ">=3.8"
-sqlalchemy-vertica-python = ">=0.6.3"
-psycopg2-binary = ">=2.9.9"
+#sqlalchemy = "~=2.0"
 sqlalchemy = "<2.0"
+sqlalchemy-vertica = ">=0.0.5"
+vertica-python = ">=1.3.8"
+#sqlalchemy-vertica-python = ">=0.6.3"
+#psycopg2-binary = ">=2.9.9"
 sshtunnel = ">=0.4.0"
 
 [tool.poetry.dependencies.singer-sdk]

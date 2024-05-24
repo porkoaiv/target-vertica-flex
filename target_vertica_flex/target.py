@@ -338,3 +338,6 @@ class TargetVerticaFlex(SQLTarget):
         ),
     ).to_dict()
     default_sink_class = VerticaFlexSink
+
+if __name__ == "__main__":
+  TargetVerticaFlex.cli()

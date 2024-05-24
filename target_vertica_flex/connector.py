@@ -14,8 +14,11 @@ from typing import cast
 import paramiko
 import simplejson
 import sqlalchemy as sa
+#import urllib
+
 from singer_sdk import SQLConnector
 from singer_sdk import typing as th
+
 #from sqla_vertica_python import ARRAY, BIGINT, BYTEA, JSONB
 from sqlalchemy.engine import URL
 from sqlalchemy.engine.url import make_url
