@@ -14,9 +14,12 @@ from typing import cast
 import paramiko
 import simplejson
 import sqlalchemy as sa
+#import urllib
+
 from singer_sdk import SQLConnector
 from singer_sdk import typing as th
-#from sqlalchemy.dialects.vertica_flex import ARRAY, BIGINT, BYTEA, JSONB
+
+#from sqla_vertica_python import ARRAY, BIGINT, BYTEA, JSONB
 from sqlalchemy.engine import URL
 from sqlalchemy.engine.url import make_url
 from sqlalchemy.types import (
@@ -30,6 +33,7 @@ from sqlalchemy.types import (
     TIMESTAMP,
     VARCHAR,
     TypeDecorator,
+    BINARY
 )
 from sshtunnel import SSHTunnelForwarder
 
@@ -277,22 +281,21 @@ class VerticaFlexConnector(SQLConnector):
         """
         if "null" in jsonschema_type["type"]:
             return None
-        # if "integer" in jsonschema_type["type"]:
-        #     return BIGINT()
+        if "integer" in jsonschema_type["type"]:
+            return INTEGER()
         # if "object" in jsonschema_type["type"]:
         #     return JSONB()
         # if "array" in jsonschema_type["type"]:
         #     return ARRAY(JSONB())
 
         # string formats
-        # if jsonschema_type.get("format") == "date-time":
-        #     return TIMESTAMP()
-        # if (
-        #     self.interpret_content_encoding
-        #     and jsonschema_type.get("contentEncoding") == "base16"
-        # ):
-        #     return HexByteString()
-
+        if jsonschema_type.get("format") == "date-time":
+            return TIMESTAMP()
+        if (
+            self.interpret_content_encoding
+            and jsonschema_type.get("contentEncoding") == "base16"
+        ):
+            return HexByteString()
         individual_type = th.to_sql_type(jsonschema_type)
         if isinstance(individual_type, VARCHAR):
             return TEXT()
@@ -309,10 +312,10 @@ class VerticaFlexConnector(SQLConnector):
             An instance of the best SQL type class based on defined precedence order.
         """
         precedence_order = [
-            #HexByteString,
+            HexByteString,
             #ARRAY,
             #JSONB,
-            TEXT,
+            #TEXT,
             TIMESTAMP,
             DATETIME,
             DATE,
@@ -329,6 +332,7 @@ class VerticaFlexConnector(SQLConnector):
                 if isinstance(obj, sql_type):
                     return obj
         return TEXT()
+        #return VARCHAR()
 
     def create_empty_table(  # type: ignore[override]
         self,
@@ -375,7 +379,7 @@ class VerticaFlexConnector(SQLConnector):
                     property_name,
                     self.to_sql_type(property_jsonschema),
                     primary_key=is_primary_key,
-                    autoincrement=False,  # See: https://github.com/MeltanoLabs/target-vertica_flex/issues/193 # noqa: E501
+                    autoincrement=False,  # See: https://github.com/MeltanoLabs/target-vertica-flex/issues/193 # noqa: E501
                 )
             )
         if as_temp_table:
@@ -834,7 +838,8 @@ class VerticaFlexConnector(SQLConnector):
 class NOTYPE(TypeDecorator):
     """Type to use when none is provided in the schema."""
 
-    impl = TEXT
+    #impl = TEXT
+    impl = VARCHAR
     cache_ok = True
 
     def process_bind_param(self, value, dialect):
@@ -853,42 +858,44 @@ class NOTYPE(TypeDecorator):
 
     def as_generic(self, *args: t.Any, **kwargs: t.Any):
         """Return the generic type for this column."""
-        return TEXT()
+        #return TEXT()
+        return VARCHAR()
 
 
-# class HexByteString(TypeDecorator):
-#     """Convert Python string representing Hex data to bytes and vice versa.
-#
-#     This is used to store binary data in more efficient format in the database.
-#     The string is encoded using the base16 encoding, as defined in RFC 4648
-#     https://json-schema.org/draft/2020-12/draft-bhutton-json-schema-validation-00#rfc.section.8.3
-#     For convenience, data prefixed with `0x` or containing an odd number of characters
-#     is supported although it's not part of the standard.
-#     """
-#
-#     impl = BYTEA
-#
-#     def process_bind_param(self, value, dialect):
-#         """Convert hex string to bytes."""
-#         if value is None:
-#             return None
-#
-#         if isinstance(value, str):
-#             if value.startswith("\\x") or value.startswith("0x"):
-#                 value = value[2:]
-#
-#             if len(value) % 2:
-#                 value = f"0{value}"
-#
-#             try:
-#                 value = bytes.fromhex(value)
-#             except ValueError as ex:
-#                 raise ValueError(f"Invalid hexadecimal string: {value}") from ex
-#
-#         if not isinstance(value, bytearray | memoryview | bytes):
-#             raise TypeError(
-#                 "HexByteString columns support only bytes or hex string values. "
-#                 f"{type(value)} is not supported"
-#             )
-#
-#         return value
+class HexByteString(TypeDecorator):
+    """Convert Python string representing Hex data to bytes and vice versa.
+
+    This is used to store binary data in more efficient format in the database.
+    The string is encoded using the base16 encoding, as defined in RFC 4648
+    https://json-schema.org/draft/2020-12/draft-bhutton-json-schema-validation-00#rfc.section.8.3
+    For convenience, data prefixed with `0x` or containing an odd number of characters
+    is supported although it's not part of the standard.
+    """
+
+    #impl = BYTEA
+    impl = BINARY
+
+    def process_bind_param(self, value, dialect):
+        """Convert hex string to bytes."""
+        if value is None:
+            return None
+
+        if isinstance(value, str):
+            if value.startswith("\\x") or value.startswith("0x"):
+                value = value[2:]
+
+            if len(value) % 2:
+                value = f"0{value}"
+
+            try:
+                value = bytes.fromhex(value)
+            except ValueError as ex:
+                raise ValueError(f"Invalid hexadecimal string: {value}") from ex
+
+        if not isinstance(value, bytearray | memoryview | bytes):
+            raise TypeError(
+                "HexByteString columns support only bytes or hex string values. "
+                f"{type(value)} is not supported"
+            )
+
+        return value

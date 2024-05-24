@@ -113,7 +113,7 @@ class VerticaFlexSink(SQLSink):
         # 'temp_test_optional_attributes_388470e9_fbd0_47b7_a52f_d32a2ee3f5f6'
         # exceeds maximum length of 63 characters
         # Is hit if we have a long table name, there is no limit on Temporary tables
-        # in vertica_flex, used a guid just in case we are using the same session
+        # in vertica-flex, used a guid just in case we are using the same session
         return f"{str(uuid.uuid4()).replace('-', '_')}"
 
     def bulk_insert_records(  # type: ignore[override]

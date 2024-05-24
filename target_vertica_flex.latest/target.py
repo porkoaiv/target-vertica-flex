@@ -1,4 +1,4 @@
-"""Postgres target class."""
+"""VerticaFlex target class."""
 
 from __future__ import annotations
 
@@ -7,11 +7,11 @@ from pathlib import PurePath
 from singer_sdk import typing as th
 from singer_sdk.target_base import SQLTarget
 
-from target_postgres.sinks import PostgresSink
+from target_vertica_flex.sinks import VerticaFlexSink
 
 
-class TargetPostgres(SQLTarget):
-    """Target for Postgres."""
+class TargetVerticaFlex(SQLTarget):
+    """Target for VerticaFlex."""
 
     def __init__(
         self,
@@ -35,7 +35,7 @@ class TargetPostgres(SQLTarget):
             parse_env_config=parse_env_config,
             validate_config=validate_config,
         )
-        # There's a few ways to do this in JSON Schema but it is schema draft dependent.
+        # There's a few ways to do this in JSON Schema, but it is schema draft dependent.
         # https://stackoverflow.com/questions/38717933/jsonschema-attribute-conditionally-required # noqa: E501
         assert (self.config.get("sqlalchemy_url") is not None) or (
             self.config.get("host") is not None
@@ -88,13 +88,13 @@ class TargetPostgres(SQLTarget):
             "`activate_version` configuration to False."
         )
 
-    name = "target-postgres"
+    name = "target-vertica-flex"
     config_jsonschema = th.PropertiesList(
         th.Property(
             "host",
             th.StringType,
             description=(
-                "Hostname for postgres instance. "
+                "Hostname for vertica-flex instance. "
                 + "Note if sqlalchemy_url is set this will be ignored."
             ),
         ),
@@ -103,7 +103,7 @@ class TargetPostgres(SQLTarget):
             th.IntegerType,
             default=5432,
             description=(
-                "The port on which postgres is awaiting connection. "
+                "The port on which vertica-flex is awaiting connection. "
                 + "Note if sqlalchemy_url is set this will be ignored."
             ),
         ),
@@ -145,7 +145,7 @@ class TargetPostgres(SQLTarget):
         th.Property(
             "dialect+driver",
             th.StringType,
-            default="postgresql+psycopg2",
+            default="vertica_flex+psycopg2",
             description=(
                 "Dialect+driver see "
                 + "https://docs.sqlalchemy.org/en/20/core/engines.html. "
@@ -156,7 +156,7 @@ class TargetPostgres(SQLTarget):
         th.Property(
             "default_target_schema",
             th.StringType,
-            description="Postgres schema to send data to, example: tap-clickup",
+            description="VerticaFlex schema to send data to, example: tap-clickup",
             default="melty",
         ),
         th.Property(
@@ -230,7 +230,7 @@ class TargetPostgres(SQLTarget):
             th.StringType,
             default="verify-full",
             description=(
-                "SSL Protection method, see [postgres documentation](https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-PROTECTION)"
+                "SSL Protection method, see [vertica-flex documentation](https://www.vertica_flex.org/docs/current/libpq-ssl.html#LIBPQ-SSL-PROTECTION)"
                 + " for more information. Must be one of disable, allow, prefer,"
                 + " require, verify-ca, or verify-full."
                 + " Note if sqlalchemy_url is set this will be ignored."
@@ -239,7 +239,7 @@ class TargetPostgres(SQLTarget):
         th.Property(
             "ssl_certificate_authority",
             th.StringType,
-            default="~/.postgresql/root.crl",
+            default="~/.vertica_flex/root.crl",
             description=(
                 "The certificate authority that should be used to verify the server's"
                 + " identity. Can be provided either as the certificate itself (in"
@@ -250,7 +250,7 @@ class TargetPostgres(SQLTarget):
         th.Property(
             "ssl_client_certificate",
             th.StringType,
-            default="~/.postgresql/postgresql.crt",
+            default="~/.vertica_flex/vertica_flex.crt",
             description=(
                 "The certificate that should be used to verify your identity to the"
                 + " server. Can be provided either as the certificate itself (in .env)"
@@ -261,7 +261,7 @@ class TargetPostgres(SQLTarget):
         th.Property(
             "ssl_client_private_key",
             th.StringType,
-            default="~/.postgresql/postgresql.key",
+            default="~/.vertica_flex/vertica_flex.key",
             description=(
                 "The private key for the certificate you provided. Can be provided"
                 + " either as the certificate itself (in .env) or as a filepath to the"
@@ -337,4 +337,7 @@ class TargetPostgres(SQLTarget):
             description="SSH Tunnel Configuration, this is a json object",
         ),
     ).to_dict()
-    default_sink_class = PostgresSink
+    default_sink_class = VerticaFlexSink
+
+if __name__ == "__main__":
+  TargetVerticaFlex.cli()

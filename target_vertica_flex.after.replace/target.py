@@ -88,7 +88,7 @@ class TargetVerticaFlex(SQLTarget):
             "`activate_version` configuration to False."
         )
 
-    name = "target-vertica-flex"
+    name = "target-vertica_flex"
     config_jsonschema = th.PropertiesList(
         th.Property(
             "host",
@@ -145,7 +145,7 @@ class TargetVerticaFlex(SQLTarget):
         th.Property(
             "dialect+driver",
             th.StringType,
-            default="vertica+vertica_python",
+            default="vertica_flexql+psycopg2",
             description=(
                 "Dialect+driver see "
                 + "https://docs.sqlalchemy.org/en/20/core/engines.html. "
@@ -230,7 +230,7 @@ class TargetVerticaFlex(SQLTarget):
             th.StringType,
             default="verify-full",
             description=(
-                "SSL Protection method, see [vertica documentation](https://www.vertica.org/docs/current/libpq-ssl.html#LIBPQ-SSL-PROTECTION)"
+                "SSL Protection method, see [vertica_flex documentation](https://www.vertica_flexql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-PROTECTION)"
                 + " for more information. Must be one of disable, allow, prefer,"
                 + " require, verify-ca, or verify-full."
                 + " Note if sqlalchemy_url is set this will be ignored."
@@ -239,7 +239,7 @@ class TargetVerticaFlex(SQLTarget):
         th.Property(
             "ssl_certificate_authority",
             th.StringType,
-            default="~/.vertica_flex/root.crl",
+            default="~/.vertica_flexql/root.crl",
             description=(
                 "The certificate authority that should be used to verify the server's"
                 + " identity. Can be provided either as the certificate itself (in"
@@ -250,7 +250,7 @@ class TargetVerticaFlex(SQLTarget):
         th.Property(
             "ssl_client_certificate",
             th.StringType,
-            default="~/.vertica_flex/vertica_flex.crt",
+            default="~/.vertica_flexql/vertica_flexql.crt",
             description=(
                 "The certificate that should be used to verify your identity to the"
                 + " server. Can be provided either as the certificate itself (in .env)"
@@ -261,7 +261,7 @@ class TargetVerticaFlex(SQLTarget):
         th.Property(
             "ssl_client_private_key",
             th.StringType,
-            default="~/.vertica_flex/vertica_flex.key",
+            default="~/.vertica_flexql/vertica_flexql.key",
             description=(
                 "The private key for the certificate you provided. Can be provided"
                 + " either as the certificate itself (in .env) or as a filepath to the"
