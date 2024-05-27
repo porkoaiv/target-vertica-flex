@@ -186,7 +186,6 @@ class VerticaFlexConnector(SQLConnector):
             columns.append(column._copy())
 
         if as_temp_table:
-            #columns.append(sa.Column('__raw__', NVARCHAR(32*1000*1000)))
             new_table = sa.Table(table_name, meta, *columns, prefixes=["FLEX"])
         else:
             new_table = sa.Table(table_name, meta, *columns)
