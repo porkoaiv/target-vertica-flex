@@ -29,6 +29,7 @@ from sqlalchemy.types import (
     TIME,
     TIMESTAMP,
     VARCHAR,
+    NVARCHAR,
     TypeDecorator,
 )
 from sshtunnel import SSHTunnelForwarder
@@ -178,12 +179,14 @@ class VerticaFlexConnector(SQLConnector):
 
         meta = sa.MetaData(schema=schema_name)
         new_table: sa.Table
+
         columns = []
 
         for column in from_table.columns:
             columns.append(column._copy())
 
         if as_temp_table:
+            #columns.append(sa.Column('__raw__', NVARCHAR(32*1000*1000)))
             new_table = sa.Table(table_name, meta, *columns, prefixes=["FLEX"])
         else:
             new_table = sa.Table(table_name, meta, *columns)
@@ -389,9 +392,10 @@ class VerticaFlexConnector(SQLConnector):
             )
 
         if as_temp_table:
+            # copy
             new_table = sa.Table(table_name, meta, *columns, prefixes=["TEMPORARY"])
         else:
-            new_table = sa.Table(table_name, meta, *columns, prefixes=["34"])
+            new_table = sa.Table(table_name, meta, *columns, prefixes=[])
 
         new_table.create(bind=connection)
         return new_table

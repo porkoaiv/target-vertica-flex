@@ -2,10 +2,12 @@
 
 import uuid
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Union, cast
+import json
 
 import sqlalchemy as sa
 from pendulum import now
 from singer_sdk.sinks import SQLSink
+from sqlalchemy import NVARCHAR
 from sqlalchemy.sql import Executable
 from sqlalchemy.sql.expression import bindparam
 
@@ -82,6 +84,7 @@ class VerticaFlexSink(SQLSink):
                 connection=connection,
             )
             # Create a temp table (Creates from the table above)
+            self.temp_table_name = "VERX_CLIENT." + self.temp_table_name
             temp_table: sa.Table = self.connector.copy_table_structure(
                 full_table_name=self.temp_table_name,
                 from_table=table,
@@ -104,8 +107,10 @@ class VerticaFlexSink(SQLSink):
                 join_keys=self.key_properties,
                 connection=connection,
             )
+
             # Drop temp table
-            self.connector.drop_table(table=temp_table, connection=connection)
+            #self.connector.drop_table(table=temp_table, connection=connection)
+
 
     def generate_temp_table_name(self):
         """Uuid temp table name."""
@@ -142,6 +147,7 @@ class VerticaFlexSink(SQLSink):
             True if table exists, False if not, None if unsure or undetectable.
         """
         columns = self.column_representation(schema)
+        columns.append(sa.Column('__raw__', NVARCHAR(32 * 1000 * 1000)))
         insert: str = cast(
             str,
             self.generate_insert_statement(
@@ -152,17 +158,28 @@ class VerticaFlexSink(SQLSink):
         self.logger.info("Inserting with SQL: %s", insert)
         # Only one record per PK, we want to take the last one
         data_to_insert: List[Dict[str, Any]] = []
+        #raw_record: Dict[str, Any] = {}
 
         if self.append_only is False:
             insert_records: Dict[str, Dict] = {}  # pk : record
             for record in records:
                 insert_record = {}
+                raw_record = {}
+
                 for column in columns:
                     insert_record[column.name] = record.get(column.name)
+
+                    if "__raw__" not in column.name and "_sdc_" not in column.name:
+                        raw_record[column.name] = str(record.get(column.name))
+
+                #insert_record["__raw__"] = json.dumps(raw_record, indent=4)
+                insert_record["__raw__"] = "abc"
+
                 # No need to check for a KeyError here because the SDK already
                 # guaruntees that all key properties exist in the record.
                 primary_key_value = "".join([str(record[key]) for key in primary_keys])
                 insert_records[primary_key_value] = insert_record
+
             data_to_insert = list(insert_records.values())
         else:
             for record in records:

@@ -5,9 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5c0d037d-131b-4775-8b81-fe40ee4d935e" name="Changes" comment="init">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/etc/ab4.json" beforeDir="false" afterPath="$PROJECT_DIR$/etc/ab4.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target_vertica_flex/connector.py" beforeDir="false" afterPath="$PROJECT_DIR$/target_vertica_flex/connector.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target_vertica_flex/sinks.py" beforeDir="false" afterPath="$PROJECT_DIR$/target_vertica_flex/sinks.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -28,16 +29,16 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Python.target.executor&quot;: &quot;Debug&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Projects/tehik/dese/trgt-vertica-flex&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PythonContentEntriesConfigurable&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python.target.executor": "Debug",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "master",
+    "last_opened_file_path": "C:/Projects/tehik/dese/trgt-vertica-flex",
+    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PythonContentEntriesConfigurable"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Projects\tehik\dese\trgt-vertica-flex" />
@@ -111,7 +112,14 @@
       <option name="presentableId" value="LOCAL−00003" />
       <updated>1716538284382</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL−00004" summary="init">
+      <option name="closed" value="true" />
+      <created>1716799352266</created>
+      <option name="number" value="LOCAL−00004" />
+      <option name="presentableId" value="LOCAL−00004" />
+      <updated>1716799352266</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -134,33 +142,13 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/target_vertica_flex/connector.py</url>
-          <line>185</line>
-          <option name="timeStamp" value="73" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/target_vertica_flex/connector.py</url>
-          <line>214</line>
+          <line>217</line>
           <option name="timeStamp" value="74" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/target_vertica_flex/connector.py</url>
-          <line>390</line>
-          <option name="timeStamp" value="75" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/target_vertica_flex/connector.py</url>
-          <line>190</line>
+          <line>193</line>
           <option name="timeStamp" value="76" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/target_vertica_flex/sinks.py</url>
-          <line>76</line>
-          <option name="timeStamp" value="77" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/target_vertica_flex/sinks.py</url>
-          <line>84</line>
-          <option name="timeStamp" value="78" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/.meltano/loaders/target-vertica-flex/venv/Lib/site-packages/joblib/parallel.py</url>
@@ -169,7 +157,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/target_vertica_flex/sinks.py</url>
-          <line>91</line>
+          <line>94</line>
           <option name="timeStamp" value="80" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -214,7 +202,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/.meltano/loaders/target-vertica-flex/venv/Lib/site-packages/sqlalchemy/sql/compiler.py</url>
-          <line>4836</line>
+          <line>4839</line>
           <option name="timeStamp" value="90" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -223,44 +211,54 @@
           <option name="timeStamp" value="101" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/.meltano/loaders/target-vertica-flex/venv/Lib/site-packages/sqlalchemy/engine/base.py</url>
-          <line>1477</line>
-          <option name="timeStamp" value="102" />
+          <url>file://$PROJECT_DIR$/target_vertica_flex/sinks.py</url>
+          <line>148</line>
+          <option name="timeStamp" value="120" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/.meltano/loaders/target-vertica-flex/venv/Lib/site-packages/sqlalchemy/engine/base.py</url>
-          <line>1485</line>
-          <option name="timeStamp" value="103" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/.meltano/loaders/target-vertica-flex/venv/Lib/site-packages/sqlalchemy/sql/compiler.py</url>
-          <line>4063</line>
-          <option name="timeStamp" value="106" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/.meltano/loaders/target-vertica-flex/venv/Lib/site-packages/sqlalchemy/sql/ddl.py</url>
-          <line>894</line>
-          <option name="timeStamp" value="109" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/.meltano/loaders/target-vertica-flex/venv/Lib/site-packages/sqlalchemy/sql/ddl.py</url>
-          <line>882</line>
-          <option name="timeStamp" value="110" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/.meltano/loaders/target-vertica-flex/venv/Lib/site-packages/sqlalchemy_vertica/base.py</url>
-          <line>66</line>
-          <option name="timeStamp" value="114" />
+          <url>file://$PROJECT_DIR$/target_vertica_flex/sinks.py</url>
+          <line>102</line>
+          <option name="timeStamp" value="122" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/.meltano/loaders/target-vertica-flex/venv/Lib/site-packages/sqlalchemy/sql/compiler.py</url>
-          <line>4862</line>
-          <option name="timeStamp" value="115" />
+          <line>4557</line>
+          <option name="timeStamp" value="123" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/.meltano/loaders/target-vertica-flex/venv/Lib/site-packages/sqlalchemy/sql/compiler.py</url>
-          <line>4578</line>
-          <option name="timeStamp" value="116" />
+          <line>4052</line>
+          <option name="timeStamp" value="125" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/target_vertica_flex/connector.py</url>
+          <line>393</line>
+          <option name="timeStamp" value="128" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/target_vertica_flex/connector.py</url>
+          <line>187</line>
+          <option name="timeStamp" value="129" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/target_vertica_flex/sinks.py</url>
+          <line>189</line>
+          <option name="timeStamp" value="132" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/target_vertica_flex/sinks.py</url>
+          <line>111</line>
+          <option name="timeStamp" value="139" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/target_vertica_flex/sinks.py</url>
+          <line>259</line>
+          <option name="timeStamp" value="140" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/target_vertica_flex/sinks.py</url>
+          <line>163</line>
+          <option name="timeStamp" value="143" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
