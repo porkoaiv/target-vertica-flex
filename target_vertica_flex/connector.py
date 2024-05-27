@@ -172,21 +172,24 @@ class VerticaFlexConnector(SQLConnector):
             The new table object.
         """
         _, schema_name, table_name = self.parse_full_table_name(full_table_name)
+
+        if self.table_exists(full_table_name=full_table_name):
+            raise RuntimeError("Table already exists")
+
         meta = sa.MetaData(schema=schema_name)
         new_table: sa.Table
         columns = []
-        if self.table_exists(full_table_name=full_table_name):
-            raise RuntimeError("Table already exists")
+
         for column in from_table.columns:
             columns.append(column._copy())
+
         if as_temp_table:
-            new_table = sa.Table(table_name, meta, *columns, prefixes=["TEMPORARY"])
-            new_table.create(bind=connection)
-            return new_table
+            new_table = sa.Table(table_name, meta, *columns, prefixes=["FLEX"])
         else:
             new_table = sa.Table(table_name, meta, *columns)
-            new_table.create(bind=connection)
-            return new_table
+
+        new_table.create(bind=connection)
+        return new_table
 
     @contextmanager
     def _connect(self) -> t.Iterator[sa.engine.Connection]:
@@ -294,8 +297,12 @@ class VerticaFlexConnector(SQLConnector):
         #     return HexByteString()
 
         individual_type = th.to_sql_type(jsonschema_type)
-        if isinstance(individual_type, VARCHAR):
-            return TEXT()
+
+        ## ----------------------------------------------
+        # if isinstance(individual_type, VARCHAR):
+        #     return TEXT()
+        ## ----------------------------------------------
+
         return individual_type
 
     @staticmethod
@@ -328,7 +335,8 @@ class VerticaFlexConnector(SQLConnector):
             for obj in sql_type_array:
                 if isinstance(obj, sql_type):
                     return obj
-        return TEXT()
+        #return TEXT()
+        return VARCHAR()
 
     def create_empty_table(  # type: ignore[override]
         self,
@@ -358,8 +366,6 @@ class VerticaFlexConnector(SQLConnector):
             NotImplementedError: if temp tables are unsupported and as_temp_table=True.
             RuntimeError: if a variant schema is passed with no properties defined.
         """
-        columns: list[sa.Column] = []
-        primary_keys = primary_keys or []
         try:
             properties: dict = schema["properties"]
         except KeyError:
@@ -367,6 +373,9 @@ class VerticaFlexConnector(SQLConnector):
                 f"Schema for table_name: '{table_name}'"
                 f"does not define properties: {schema}"
             )
+
+        columns: list[sa.Column] = []
+        primary_keys = primary_keys or []
 
         for property_name, property_jsonschema in properties.items():
             is_primary_key = property_name in primary_keys
@@ -378,12 +387,12 @@ class VerticaFlexConnector(SQLConnector):
                     autoincrement=False,  # See: https://github.com/MeltanoLabs/target-vertica_flex/issues/193 # noqa: E501
                 )
             )
+
         if as_temp_table:
             new_table = sa.Table(table_name, meta, *columns, prefixes=["TEMPORARY"])
-            new_table.create(bind=connection)
-            return new_table
+        else:
+            new_table = sa.Table(table_name, meta, *columns, prefixes=["34"])
 
-        new_table = sa.Table(table_name, meta, *columns)
         new_table.create(bind=connection)
         return new_table
 
@@ -834,7 +843,7 @@ class VerticaFlexConnector(SQLConnector):
 class NOTYPE(TypeDecorator):
     """Type to use when none is provided in the schema."""
 
-    impl = TEXT
+    impl = VARCHAR
     cache_ok = True
 
     def process_bind_param(self, value, dialect):

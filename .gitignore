@@ -1,5 +1,5 @@
 smoke-test
-.meltano/**
+#.meltano/**
 .tox/**
 .secrets/**
 .vscode/**
@@ -7,11 +7,11 @@ output/**
 .env
 
 # Secrets and internal config files
-.secrets/*
+#.secrets/*
 
 # Ignore meltano internal cache and sqlite systemdb
 
-.meltano/
+#.meltano/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
