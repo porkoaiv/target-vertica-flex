@@ -146,11 +146,6 @@ class VerticaFlexSink(SQLSink):
             # Drop temp table
             self.connector.drop_table(table=temp_table, connection=connection)
 
-            #self.connector.get_table(full_table_name=temp_table).drop(self.connector._engine)
-            #self.connector.get_table(full_table_name=temp_table.fullname + "_error").drop(self.connector._engine)
-            # temp_table_error: sa.Table = self.connector.get_table(temp_table.fullname + "_error")
-            # self.connector.drop_table(table=temp_table_error, connection=connection)
-
     def generate_temp_table_name(self):
         """Uuid temp table name."""
         # sa.exc.IdentifierError: Identifier
@@ -554,7 +549,7 @@ class VerticaFlexSink(SQLSink):
                 insert_records[primary_key_value] = insert_record
                 raw_to_insert[primary_key_value] = raw_record
 
-                break
+                #break
 
             data_to_insert = list(insert_records.values())
             dataraw_to_insert = list(raw_to_insert.values())
@@ -567,16 +562,6 @@ class VerticaFlexSink(SQLSink):
                 data_to_insert.append(insert_record)
 
         self.flush_records(table.name, dataraw_to_insert)
-
-        # insert: str = cast(
-        #     str,
-        #     self.generate_insert_statement(
-        #         table.name,
-        #         columns,
-        #     ),
-        # )
-        # self.logger.info("Inserting with SQL: %s", insert)
-        #connection.execute(insert, data_to_insert)
 
         return True
 
@@ -610,18 +595,16 @@ class VerticaFlexSink(SQLSink):
             temp_table = self.temp_table_name
 
             cur.fetchall()
-
+            # copy_sql = ("""COPY {table} FROM LOCAL '{file}'
+            #     PARSER fjsonparser(RECORD_TERMINATOR=E',',reject_on_materialized_type_error=true)
+            #     REJECTED DATA AS TABLE {table}_error """
+            #             .format(table=temp_table,file=file))
             copy_sql = ("""COPY {table} FROM LOCAL '{file}'
                 PARSER fjsonparser(RECORD_TERMINATOR=E',',reject_on_materialized_type_error=true)
-                REJECTED DATA AS TABLE {table}_error """
+                ABORT ON ERROR """
                         .format(table=temp_table,file=file))
             cur.execute(copy_sql)
             cur.fetchall()
-
-            inserts = cur.rowcount
-            self.logger.info('Loading into %s: %s',
-                             self.table_name,
-                             json.dumps({'inserts': inserts, 'updates': updates, 'size_bytes': size_bytes}))
 
     def primary_key_condition(self, right_table, null=False):
         names = self.key_properties
@@ -650,8 +633,6 @@ class VerticaFlexSink(SQLSink):
         connection1 = connection.connection
         with connection1.cursor('dict') as cur:
             updates = 0
-
-            #temp_table = self.temp_table_name
 
             copy_sql = ( """INSERT INTO {} ({})
                     (SELECT {} FROM {} s LEFT OUTER JOIN {} t ON {} WHERE {})

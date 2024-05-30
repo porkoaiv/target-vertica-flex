@@ -5,19 +5,20 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5c0d037d-131b-4775-8b81-fe40ee4d935e" name="Changes" comment="init">
-      <change afterPath="$PROJECT_DIR$/etc/ab1.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/etc/ab10.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/etc/ab11.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/etc/ab2.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/etc/ab3.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/etc/ab5a.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/etc/ab6.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/etc/ab7.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/etc/ab8.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/etc/ab9.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/etc/config.init.json" beforeDir="false" afterPath="$PROJECT_DIR$/etc/config.init.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/meltano.yml" beforeDir="false" afterPath="$PROJECT_DIR$/meltano.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/etc/ab1.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/etc/ab10.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/etc/ab11.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/etc/ab2.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/etc/ab3.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/etc/ab4.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/etc/ab4a.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/etc/ab5.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/etc/ab5a.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/etc/ab6.json" beforeDir="false" afterPath="$PROJECT_DIR$/etc/data.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/etc/ab7.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/etc/ab8.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/etc/ab9.json" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/target_vertica_flex/sinks.py" beforeDir="false" afterPath="$PROJECT_DIR$/target_vertica_flex/sinks.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -41,7 +42,7 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
-    "Python.target.executor": "Debug",
+    "Python.target.executor": "Run",
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "git-widget-placeholder": "master",
@@ -71,7 +72,7 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/target_vertica_flex/target.py" />
-      <option name="PARAMETERS" value="--config $PROJECT_DIR$/etc/config.init.json --input $PROJECT_DIR$/etc/ab6.json" />
+      <option name="PARAMETERS" value="--config $PROJECT_DIR$/etc/config.init.json --input $PROJECT_DIR$/etc/data.json" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
@@ -143,7 +144,14 @@
       <option name="presentableId" value="LOCAL−00006" />
       <updated>1716813334332</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL−00007" summary="init">
+      <option name="closed" value="true" />
+      <created>1717060138542</created>
+      <option name="number" value="LOCAL−00007" />
+      <option name="presentableId" value="LOCAL−00007" />
+      <updated>1717060138542</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -176,8 +184,8 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/target_vertica_flex/sinks.py</url>
-          <line>148</line>
-          <option name="timeStamp" value="270" />
+          <line>643</line>
+          <option name="timeStamp" value="272" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
