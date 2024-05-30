@@ -36,3 +36,4 @@ plugins:
       stream_maps: {}
       validate_records: true
       supports_statement_cache: false
+      temp_dir: '/Projects/tehik/dese/temp'

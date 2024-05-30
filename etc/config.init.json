@@ -21,5 +21,6 @@
   "ssl_mode": "",
   "ssl_storage_directory": "",
   "validate_records": true,
-  "supports_statement_cache": true
+  "supports_statement_cache": true,
+  "temp_dir": "/Projects/tehik/dese/temp"
 }

@@ -1,8 +1,9 @@
 """VerticaFlex target sink class, which handles writing streams."""
-
+import os
 import uuid
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Union, cast
 import json
+from tempfile import mkstemp
 
 import sqlalchemy as sa
 from pendulum import now
@@ -89,7 +90,7 @@ class VerticaFlexSink(SQLSink):
             self.temp_table_name = "VERX_CLIENT." + self.temp_table_name
 
             # Create a temp table (Creates from the table above)
-            if True:
+            if False:
                 temp_table: sa.Table = self.connector.copy_table_structure(
                     full_table_name=self.temp_table_name,
                     from_table=table,
@@ -115,7 +116,7 @@ class VerticaFlexSink(SQLSink):
                     connection=connection,
                 )
 
-            if False:
+            if True:
                 ## FLEX ---------------------------------------------------------------------------------------
                 temp_table: sa.Table = self.create_table_flex(
                     full_table_name=self.temp_table_name,
@@ -145,45 +146,10 @@ class VerticaFlexSink(SQLSink):
             # Drop temp table
             self.connector.drop_table(table=temp_table, connection=connection)
 
-    def create_table_flex(
-        self,
-        full_table_name: str,
-        from_table: sa.Table,
-        connection: sa.engine.Connection,
-        as_temp_table: bool = False,
-    ) -> sa.Table:
-        """Copy table structure.
-
-        Args:
-            full_table_name: the target table name potentially including schema
-            from_table: the  source table
-            connection: the database connection.
-            as_temp_table: True to create a temp table.
-
-        Returns:
-            The new table object.
-        """
-        _, schema_name, table_name = self.connector.parse_full_table_name(full_table_name)
-
-        if self.connector.table_exists(full_table_name=full_table_name):
-            raise RuntimeError("Table already exists")
-
-        meta = sa.MetaData(schema=schema_name)
-        new_table: sa.Table
-
-        columns = []
-
-        for column in from_table.columns:
-            columns.append(column._copy())
-
-        if as_temp_table:
-            new_table = sa.Table(table_name, meta, *columns, prefixes=["FLEX"])
-        else:
-            new_table = sa.Table(table_name, meta, *columns)
-
-        new_table.create(bind=connection)
-        return new_table
-
+            #self.connector.get_table(full_table_name=temp_table).drop(self.connector._engine)
+            #self.connector.get_table(full_table_name=temp_table.fullname + "_error").drop(self.connector._engine)
+            # temp_table_error: sa.Table = self.connector.get_table(temp_table.fullname + "_error")
+            # self.connector.drop_table(table=temp_table_error, connection=connection)
 
     def generate_temp_table_name(self):
         """Uuid temp table name."""
@@ -192,7 +158,7 @@ class VerticaFlexSink(SQLSink):
         # exceeds maximum length of 63 characters
         # Is hit if we have a long table name, there is no limit on Temporary tables
         # in vertica_flex, used a guid just in case we are using the same session
-        return f"{str(uuid.uuid4()).replace('-', '_')}"
+        return "tmp_" + f"{str(uuid.uuid4()).replace('-', '_')}"[:16]
 
     def bulk_insert_records(  # type: ignore[override]
         self,
@@ -250,78 +216,6 @@ class VerticaFlexSink(SQLSink):
 
                 #insert_record["__raw__"] = load_varbinary_text(as_bytes(insert_record["__raw__"]),Dict[str, Any])
 
-                #.replace("'","''"))
-
-                insert_record["__raw__"] = "abc"
-
-                # No need to check for a KeyError here because the SDK already
-                # guaruntees that all key properties exist in the record.
-                primary_key_value = "".join([str(record[key]) for key in primary_keys])
-                insert_records[primary_key_value] = insert_record
-
-            data_to_insert = list(insert_records.values())
-        else:
-            for record in records:
-                insert_record = {}
-                for column in columns:
-                    insert_record[column.name] = record.get(column.name)
-                data_to_insert.append(insert_record)
-
-        connection.execute(insert, data_to_insert)
-        return True
-
-    def bulk_insert_records_flex(  # type: ignore[override]
-        self,
-        table: sa.Table,
-        schema: dict,
-        records: Iterable[Dict[str, Any]],
-        primary_keys: Sequence[str],
-        connection: sa.engine.Connection,
-    ) -> Optional[int]:
-        """Bulk insert records to an existing destination table.
-
-        The default implementation uses a generic SQLAlchemy bulk insert operation.
-        This method may optionally be overridden by developers in order to provide
-        faster, native bulk uploads.
-
-        Args:
-            table: the target table object.
-            schema: the JSON schema for the new table, to be used when inferring column
-                names.
-            records: the input records.
-            primary_keys: the primary key columns for the table.
-            connection: the database connection.
-
-        Returns:
-            True if table exists, False if not, None if unsure or undetectable.
-        """
-        columns = self.column_representation(schema)
-        columns.append(sa.Column('__raw__', NVARCHAR(32 * 1000 * 1000)))
-        insert: str = cast(
-            str,
-            self.generate_insert_statement(
-                table.name,
-                columns,
-            ),
-        )
-        self.logger.info("Inserting with SQL: %s", insert)
-        # Only one record per PK, we want to take the last one
-        data_to_insert: List[Dict[str, Any]] = []
-        #raw_record: Dict[str, Any] = {}
-
-        if self.append_only is False:
-            insert_records: Dict[str, Dict] = {}  # pk : record
-            for record in records:
-                insert_record = {}
-                raw_record = {}
-
-                for column in columns:
-                    #insert_record[column.name] = record.get(column.name)
-
-                    if "__raw__" not in column.name and "_sdc_" not in column.name:
-                        raw_record[column.name] = str(record.get(column.name))
-
-                #insert_record["__raw__"] = json.dumps(raw_record, indent=4)
                 insert_record["__raw__"] = "abc"
 
                 # No need to check for a KeyError here because the SDK already
@@ -341,77 +235,6 @@ class VerticaFlexSink(SQLSink):
         return True
 
     def upsert(
-        self,
-        from_table: sa.Table,
-        to_table: sa.Table,
-        schema: dict,
-        join_keys: Sequence[str],
-        connection: sa.engine.Connection,
-    ) -> Optional[int]:
-        """Merge upsert data from one table to another.
-
-        Args:
-            from_table: The source table.
-            to_table: The destination table.
-            schema: Singer Schema message.
-            join_keys: The merge upsert keys, or `None` to append.
-            connection: The database connection.
-
-        Return:
-            The number of records copied, if detectable, or `None` if the API does not
-            report number of records affected/inserted.
-
-        """
-        if self.append_only is True:
-            # Insert
-            select_stmt = sa.select(from_table.columns).select_from(from_table)
-            insert_stmt = to_table.insert().from_select(
-                names=from_table.columns, select=select_stmt
-            )
-            connection.execute(insert_stmt)
-        else:
-            join_predicates = []
-            to_table_key: sa.Column
-            for key in join_keys:
-                from_table_key: sa.Column = from_table.columns[key]
-                to_table_key = to_table.columns[key]
-                join_predicates.append(from_table_key == to_table_key)
-
-            join_condition = sa.and_(*join_predicates)
-
-            where_predicates = []
-            for key in join_keys:
-                to_table_key = to_table.columns[key]
-                where_predicates.append(to_table_key.is_(None))
-            where_condition = sa.and_(*where_predicates)
-
-            select_stmt = (
-                sa.select(from_table.columns)
-                .select_from(from_table.outerjoin(to_table, join_condition))
-                .where(where_condition)
-            )
-            insert_stmt = sa.insert(to_table).from_select(
-                names=from_table.columns, select=select_stmt
-            )
-
-            connection.execute(insert_stmt)
-
-            # Update
-            where_condition = join_condition
-            update_columns = {}
-            for column_name in self.schema["properties"].keys():
-                from_table_column: sa.Column = from_table.columns[column_name]
-                to_table_column: sa.Column = to_table.columns[column_name]
-                update_columns[to_table_column] = from_table_column
-
-            update_stmt = (
-                sa.update(to_table).where(where_condition).values(update_columns)
-            )
-            connection.execute(update_stmt)
-
-        return None
-
-    def upsert_flex(
         self,
         from_table: sa.Table,
         to_table: sa.Table,
@@ -514,6 +337,24 @@ class VerticaFlexSink(SQLSink):
         metadata = sa.MetaData()
         table = sa.Table(full_table_name, metadata, *columns)
         return sa.insert(table)
+
+    def generate_update_statement(
+        self,
+        full_table_name: str,
+        columns: List[sa.Column],  # type: ignore[override]
+    ) -> Union[str, Executable]:
+        """Generate an insert statement for the given records.
+
+        Args:
+            full_table_name: the target table name.
+            columns: the target table columns.
+
+        Returns:
+            An insert statement.
+        """
+        metadata = sa.MetaData()
+        table = sa.Table(full_table_name, metadata, *columns)
+        return sa.update(table)
 
     def conform_name(self, name: str, object_type: Optional[str] = None) -> str:
         """Conforming names of tables, schemas, column names."""
@@ -637,3 +478,192 @@ class VerticaFlexSink(SQLSink):
             )
             bind_params = {"deletedate": deleted_at, "version": new_version}
             connection.execute(update_stmt, bind_params)
+
+    def create_table_flex(
+        self,
+        full_table_name: str,
+        from_table: sa.Table,
+        connection: sa.engine.Connection,
+        as_temp_table: bool = False,
+    ) -> sa.Table:
+
+        _, schema_name, table_name = self.connector.parse_full_table_name(full_table_name)
+
+        if self.connector.table_exists(full_table_name=full_table_name):
+            raise RuntimeError("Table already exists")
+
+        meta = sa.MetaData(schema=schema_name)
+        new_table: sa.Table
+
+        columns = []
+
+        for column in from_table.columns:
+            columns.append(column._copy())
+
+        if as_temp_table:
+            new_table = sa.Table(table_name, meta, *columns, prefixes=["FLEX"])
+        else:
+            new_table = sa.Table(table_name, meta, *columns)
+
+        new_table.create(bind=connection)
+        return new_table
+
+    def bulk_insert_records_flex(  # type: ignore[override]
+        self,
+        table: sa.Table,
+        schema: dict,
+        records: Iterable[Dict[str, Any]],
+        primary_keys: Sequence[str],
+        connection: sa.engine.Connection,
+    ) -> Optional[int]:
+
+        """Bulk insert records to an existing destination table.
+        The default implementation uses a generic SQLAlchemy bulk insert operation.
+        This method may optionally be overridden by developers in order to provide
+        faster, native bulk uploads.
+        """
+
+        columns = self.column_representation(schema)
+        #columns.append(sa.Column('__raw__', NVARCHAR(32 * 1000 * 1000)))
+
+        # Only one record per PK, we want to take the last one
+        data_to_insert: List[Dict[str, Any]] = []
+        dataraw_to_insert: List[Dict[str, Any]] = []
+
+        if self.append_only is False:
+            insert_records: Dict[str, Dict] = {}  # pk : record
+            raw_to_insert: Dict[str, Any] = {}
+            for record in records:
+                insert_record = {}
+                raw_record = {}
+
+                for column in columns:
+                    insert_record[column.name] = record.get(column.name)
+                    if "__raw__" not in column.name and "_sdc_" not in column.name:
+                        value=str(record.get(column.name))
+                        if(value=="None"):
+                            value = None
+                        raw_record[column.name] = value
+
+                #insert_record["__raw__"] = "abc"
+
+                # No need to check for a KeyError here because the SDK already
+                # guaruntees that all key properties exist in the record.
+                primary_key_value = "".join([str(record[key]) for key in primary_keys])
+
+                insert_records[primary_key_value] = insert_record
+                raw_to_insert[primary_key_value] = raw_record
+
+                break
+
+            data_to_insert = list(insert_records.values())
+            dataraw_to_insert = list(raw_to_insert.values())
+
+        else:
+            for record in records:
+                insert_record = {}
+                for column in columns:
+                    insert_record[column.name] = record.get(column.name)
+                data_to_insert.append(insert_record)
+
+        self.flush_records(table.name, dataraw_to_insert)
+
+        # insert: str = cast(
+        #     str,
+        #     self.generate_insert_statement(
+        #         table.name,
+        #         columns,
+        #     ),
+        # )
+        # self.logger.info("Inserting with SQL: %s", insert)
+        #connection.execute(insert, data_to_insert)
+
+        return True
+
+    def flush_records(self, tableFullName, data_to_insert):
+        row_count = len(data_to_insert)
+        temp_dir = self.config.get("temp_dir")
+        """Take a list of records and load into database"""
+        if temp_dir:
+            temp_dir = os.path.expanduser(temp_dir)
+            os.makedirs(temp_dir, exist_ok=True)
+
+        size_bytes = 0
+        json_fd, json_file = mkstemp(suffix='.json', prefix=None, dir=temp_dir)
+
+        with open(json_fd, 'w') as outfile:
+           json.dump(data_to_insert, outfile)
+
+        size_bytes = os.path.getsize(json_file)
+        self.load_json(json_file, row_count, size_bytes)
+
+        # Delete temp file
+        os.remove(json_file)
+
+    def load_json(self, file, count, size_bytes):
+        self.logger.info("Loading %d rows into '%s'", count, self.temp_table_name)
+
+        connection = self.connection.connection
+        with connection.cursor('dict') as cur:
+            updates = 0
+
+            temp_table = self.temp_table_name
+
+            cur.fetchall()
+
+            copy_sql = ("""COPY {table} FROM LOCAL '{file}'
+                PARSER fjsonparser(RECORD_TERMINATOR=E',',reject_on_materialized_type_error=true)
+                REJECTED DATA AS TABLE {table}_error """
+                        .format(table=temp_table,file=file))
+            cur.execute(copy_sql)
+            cur.fetchall()
+
+            inserts = cur.rowcount
+            self.logger.info('Loading into %s: %s',
+                             self.table_name,
+                             json.dumps({'inserts': inserts, 'updates': updates, 'size_bytes': size_bytes}))
+
+    def primary_key_condition(self, right_table, null=False):
+        names = self.key_properties
+        if null:
+            return ' AND '.join(['{}.{} is null'.format(right_table, c) for c in names])
+        return ' AND '.join(['s.{} = {}.{}'.format(c, right_table, c) for c in names])
+
+    def upsert_flex(
+        self,
+        from_table: sa.Table,
+        to_table: sa.Table,
+        schema: dict,
+        join_keys: Sequence[str],
+        connection: sa.engine.Connection,
+    ) -> Optional[int]:
+
+        columns_list = self.column_representation(self.schema)
+
+        columns = {}
+        scolumns = {}
+        for column in columns_list:
+            if "__raw__" not in column.name and "_sdc_" not in column.name:
+                columns[column.name] = column.name + '\n'
+                scolumns[column.name] = "s."+column.name + '\n'
+
+        connection1 = connection.connection
+        with connection1.cursor('dict') as cur:
+            updates = 0
+
+            #temp_table = self.temp_table_name
+
+            copy_sql = ( """INSERT INTO {} ({})
+                    (SELECT {} FROM {} s LEFT OUTER JOIN {} t ON {} WHERE {})
+                """.format(to_table, ', '.join(columns.values()), ', '.join(scolumns.values()), from_table, to_table,
+                self.primary_key_condition('t'), self.primary_key_condition('t', null=True)) )
+            cur.execute(copy_sql)
+            cur.fetchall()
+
+            inserts = cur.rowcount
+
+            self.logger.info('Loading into %s: %s',
+                             self.table_name,
+                             json.dumps({'inserts': inserts, 'updates': updates}))
+
+        return None
